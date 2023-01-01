@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "93872849046",
+    "project_id": "clip-33f21",
+    "storage_bucket": "clip-33f21.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93872849046:android:78a51b7592a2bfe6e342b7",
+        "android_client_info": {
+          "package_name": "com.jtechdevelopers.clip"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "93872849046-fl1ln247310j4k29g76sk9njqa1qr14u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPd6i3HzUma3iT6cwyc2VXmsG4mQekQIc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "93872849046-fl1ln247310j4k29g76sk9njqa1qr14u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
