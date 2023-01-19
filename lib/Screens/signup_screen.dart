@@ -1,13 +1,22 @@
+
+import 'package:clip/Models/form_validators.dart';
 import 'package:clip/Models/user_model.dart';
 import 'package:clip/Screens/edit_profile.dart';
 import 'package:clip/Screens/email_verification_screen.dart';
 import 'package:clip/Screens/landingPage_manager.dart';
 import 'package:clip/Screens/login_screen.dart';
+import 'package:clip/Utils/authExceptionHandler.dart';
+import 'package:clip/Utils/authResultStatus.dart';
+import 'package:clip/Utils/localStorage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../AuthMangers/auth_service.dart';
+import '../Models/global_variables.dart';
 import '../Utils/progress_bar.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -17,23 +26,24 @@ class SignUpScreen extends StatefulWidget {
   _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _SignUpScreenState extends State<SignUpScreen> with FormValidators {
 
+  TextEditingController emailFieldController = TextEditingController();
+  TextEditingController passFieldController = TextEditingController();
+  TextEditingController comfirmPassFieldController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
   final AuthService _authService = AuthService();
-  String emailField = "";
-  String passField = "";
-  String confirmPassField = "";
-  String error = "";
-  String successMssg = "";
   bool loading = false;
   String roleField = 'normal_user';
   bool isVisible = false;
+
   final _firebaseAuth = FirebaseAuth.instance;
-
-  String? m;
-
   bool _passwordVisible =false;
+
+  String? message;
+
+  FirebaseAuthException? msg;
 
   @override
   void initState() {
@@ -44,6 +54,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -66,11 +77,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15),
                     child: TextFormField(
-                      validator: (val) =>
-                      val!.isEmpty ? 'Enter Your Email Address' : null,
-                      onChanged: (val) {
-                        setState(() => emailField = val);
-                      },
+                      controller: emailFieldController,
+                      validator: emailValidator,
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: new BorderRadius.circular(20.0),
@@ -85,12 +93,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     padding: const EdgeInsets.only(
                         left: 15.0, right: 15.0, top: 15, bottom: 0),
                     child: TextFormField(
-                      validator: (val) => val!.length < 6
-                          ? 'Password should be at least six characters'
-                          : null,
-                      onChanged: (val) {
-                        setState(() => passField = val);
-                      },
+
+                      controller: passFieldController,
+                      validator: passwordValidator,
                       obscureText: !_passwordVisible,
                       enableSuggestions: false,
                       autocorrect: false,
@@ -101,7 +106,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             BorderSide(width: 2, color: Colors.pink),
                           ),
                           suffixIcon: IconButton(icon: Icon(_passwordVisible ? Icons.visibility
-                              : Icons.visibility_off, color: Colors.red),
+                              : Icons.visibility_off),
                             onPressed: () {
                               setState(() {
                                 _passwordVisible = !_passwordVisible;
@@ -112,16 +117,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       style: TextStyle(fontSize: 15),
                     ),
                   ),
+                  SizedBox(height: 1.h,),
+                   Center(
+                     child: Padding(
+                       padding: EdgeInsets.symmetric(horizontal: 10.w),
+                       child: Text("Password should be at least 6 Characters,"
+                          " Should contain at least 1 UpperCase ",
+                        style: TextStyle(color: Colors.black, fontSize: 14.sp),),
+                     ),
+                   ),
                   Padding(
                     padding: const EdgeInsets.only(
                         left: 15.0, right: 15.0, top: 15, bottom: 0),
                     child: TextFormField(
+
+                      validator: confirmPassValidator,
                       // ignore: unrelated_type_equality_checks
-                      validator: (val) =>
-                      val != passField ? 'Password not match' : null,
-                      onChanged: (val) {
-                        setState(() => confirmPassField = val);
-                      },
+                      controller: comfirmPassFieldController,
                       obscureText: !_passwordVisible,
                       enableSuggestions: false,
                       autocorrect: false,
@@ -137,7 +149,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               _passwordVisible
                                   ? Icons.visibility
                                   : Icons.visibility_off,
-                              color: Colors.red
                             ),
                             onPressed: () {
                               setState(() {
@@ -149,8 +160,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       style: TextStyle(fontSize: 15),
                     ),
                   ),
-                  Visibility(
-                      visible: isVisible, child: Text('Role:' + (roleField))),
+
                   TextButton(
                     onPressed: () {},
                     child: Text(
@@ -161,55 +171,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   SizedBox(height: 7.h,),
                   loading ? ProgressBar()
                       : ElevatedButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          setState(() {
-                            loading = true;
-                          });
-
-                          AuthUserModel result =
-                          await _authService.regWithEmailAndPassword(
-                            emailField,
-                            passField,
-                          );
-
-                          if (result.uid.isEmpty) {
-                            setState(() {
-                              error = "please enter your details properly";
-                              loading = false;
-                            });
-                          } else {
-                            _firebaseAuth.currentUser?.sendEmailVerification();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content:
-                              Text("A verifycation link has been send to your mail"),),);
-
-                            User? user;
-                            // ignore: use_build_context_synchronously
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const EmailVerificationScreen()));
-                          }
-                        }
+                      onPressed: () {
+                        createUser();
                       },
                       style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
                           primary: Colors.green,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 20),
-                          textStyle: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30.w, vertical: 2.h),
+                          textStyle: TextStyle(
+                              fontSize: 15.sp, fontWeight: FontWeight.bold)),
                       child: const Text('SIGN UP')),
                   SizedBox(
                     height: 12,
-                  ),
-                  Text(
-                    error,
-                    style: TextStyle(color: Colors.red, fontSize: 14.0),
                   ),
                   SizedBox(height: 7.h,),
                   TextButton(
@@ -238,4 +214,70 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
+
+  /*Future _showAlertDialog(errorMsg) {
+    return showDialog(context: context, builder: (buildContext){
+      return AlertDialog(
+        title: Text("SignUp Faild",
+          style: TextStyle(fontSize: 18.sp, color: Colors.black,
+              fontWeight: FontWeight.bold),),
+        content: Text("$errorMsg", style: TextStyle(color: Colors.black, fontSize: 15.sp),),
+      );
+    });
+
+  }*/
+
+  String? confirmPassValidator(String? value) {
+    if(value != passFieldController.text) {
+      return "pasword did not match";
+    }
+    return null;
+  }
+
+  Future createUser() async {
+     if (_formKey.currentState!.validate()) {
+            setState(() {
+              loading = true;
+            });
+
+            try{
+              AuthUserModel? result =
+              await _authService.regWithEmailAndPassword(
+                emailFieldController.text,
+                passFieldController.text,
+              );
+
+              if (result != null) {
+                _firebaseAuth.currentUser?.sendEmailVerification();
+                /*ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(duration: Duration(seconds: 5), content:
+                  Text("A verifycation link has been send to your mail"),),);*/
+                // ignore: use_build_context_synchronously
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                        const EmailVerificationScreen()));
+              } else {
+                setState(() {
+                  loading = false;
+                });
+
+              }
+
+            } on FirebaseAuthException catch(exception){
+
+              setState(() {
+                msg = exception;
+                loading = false;
+              });
+
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(msg!.message.toString()),));
+            }
+                    return;
+          }
+
+  }
 }
+

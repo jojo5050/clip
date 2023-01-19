@@ -1,5 +1,6 @@
 
 
+import 'package:clip/Screens/edit_profile.dart';
 import 'package:clip/Screens/landing.dart';
 import 'package:clip/Screens/landingPage_manager.dart';
 import 'package:clip/Screens/loged_user_profile.dart';
@@ -19,6 +20,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case '/landing':
       return MaterialPageRoute(builder: (_) => Landing(uid: 'uid',));
+
+    case '/edit_profile':
+      return MaterialPageRoute(builder: (_) => EditProfile());
 
     case '/logedUserProfile':
       return MaterialPageRoute(builder: (_) => LogedUserProfile(documentID: 'documentID',));

@@ -1,4 +1,5 @@
 import 'package:clip/AuthMangers/auth_service.dart';
+import 'package:clip/Models/form_validators.dart';
 import 'package:clip/Models/user_model.dart';
 import 'package:clip/Screens/landingPage_manager.dart';
 import 'package:clip/Screens/signup_screen.dart';
@@ -15,9 +16,11 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with FormValidators {
 
   final _formKey = GlobalKey<FormState>();
+  TextEditingController emailFieldController = TextEditingController();
+  TextEditingController passFieldController = TextEditingController();
 
   String emailField = "";
   String passField = "";
@@ -26,6 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _passwordVisible = false;
   final _firebaseAuth = FirebaseAuth.instance;
  final AuthService _authService = AuthService();
+
+  FirebaseAuthException? msg;
 
  @override
   void initState() {
@@ -57,11 +62,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15),
                     child: TextFormField(
-                      validator: (val) =>
-                      val!.isEmpty ? 'Email must not be empty' : null,
-                      onChanged: (val) {
-                        setState(() => emailField = val);
-                      },
+                      controller: emailFieldController,
+                      validator: emailValidator,
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: new BorderRadius.circular(
@@ -78,12 +80,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.only(
                         left: 15.0, right: 15.0, top: 15, bottom: 0),
                     child: TextFormField(
-                      validator: (val) => val!.length < 6
-                          ? 'Password should be at least six characters'
-                          : null,
-                      onChanged: (val) {
-                        setState(() => passField = val);
-                      },
+                     controller: passFieldController,
+                     // validator: passwordValidator,
                       obscureText: !_passwordVisible,
                       enableSuggestions: false,
                       autocorrect: false,
@@ -93,9 +91,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderSide:
                             BorderSide(width: 2, color: Colors.pink),
                           ),
-                          suffixIcon: IconButton(icon: Icon(_passwordVisible
+                          suffixIcon: IconButton(
+                            icon: Icon(_passwordVisible
                               ? Icons.visibility : Icons.visibility_off
-                          ), onPressed: () {  },),
+                          ), onPressed: () {
+                              setState(() {
+                                _passwordVisible = !_passwordVisible;
+                              });
+                          },),
                           labelText: 'Password'),
 
                       style: TextStyle(fontSize: 15),
@@ -103,48 +106,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   TextButton(
                     onPressed: () {},
-                    child: Text(
+                    child: const Text(
                       'Forgot Password',
-                      style: TextStyle(color: Colors.blue, fontSize: 15),
+                      style: TextStyle(color: Colors.black, fontSize: 15),
                     ),
                   ),
-                  SizedBox(height: 10.sp,),
+                  SizedBox(height: 10.h,),
                   loading
                       ? ProgressBar()
                       : ElevatedButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          setState(() {
-                            loading = true;
-                          });
-                          AuthUserModel result =
-                          await _authService.signInWithEmailAndPassword(
-                              emailField, passField);
-
-                           if(_firebaseAuth.currentUser!.uid.isEmpty){
-                             ScaffoldMessenger.of(context)
-                                 .showSnackBar(SnackBar(content: Text("User does not exit")));
-                             return;
-                           }else{
-                             // ignore: use_build_context_synchronously
-                             Navigator.pushReplacement(
-                                 context,
-                                 MaterialPageRoute(
-                                     builder: (context) => LandingPageManager(
-                                         uid: result.uid)));
-                           }
-
-                        }
+                      onPressed: () {
+                        logUserIn();
                       },
                       style: ElevatedButton.styleFrom(
                           shape: new RoundedRectangleBorder(
                             borderRadius: new BorderRadius.circular(30.0),
                           ),
                           primary: Colors.green,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 20),
-                          textStyle: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30.w, vertical: 2.h),
+                          textStyle: TextStyle(
+                              fontSize: 15.sp, fontWeight: FontWeight.bold)),
                       child: const Text('LOGIN')),
                   SizedBox(
                     height: 12,
@@ -166,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text(
                       'New User? Create Account',
                       style: TextStyle(
-                        color: Colors.blue,
+                        color: Colors.black,
                         fontSize: 15,
                       ),
                     ),
@@ -180,6 +162,51 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
     );
+  }
+
+  Future logUserIn() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        loading = true;
+      });
+
+      try{
+        AuthUserModel? result =
+        await _authService.signInWithEmailAndPassword(
+            emailFieldController.text,
+            passFieldController.text);
+
+        if(result != null){
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text("Login Successful")));
+
+          // ignore: use_build_context_synchronously
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => LandingPageManager(
+                      uid: result.uid)));
+                     return;
+        }else{
+          setState(() {
+            loading = false;
+          });
+        }
+
+      } on FirebaseAuthException catch(exception){
+        setState(() {
+          msg = exception;
+          loading = false;
+        });
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg!.message.toString()),));
+
+      }
+        return;
+
+    }
   }
 }
 

@@ -4,6 +4,9 @@ import 'package:clip/Screens/landing.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
+import 'all_users.dart';
+import 'find_users.dart';
+import 'go_live.dart';
 import 'loged_user_profile.dart';
 
 class LandingPageManager extends StatefulWidget {
@@ -17,12 +20,13 @@ class LandingPageManager extends StatefulWidget {
 class _LandingPageManagerState extends State<LandingPageManager> {
 
   int selectedIndex = 0;
-  double bottomNavBarHeight = 60;
 
   static const List<Widget> _pages = <Widget>[
   Landing(uid: "uid"),
+  AllUsers(),
+  GoLive(),
+  FindUsers(),
   LogedUserProfile(documentID: 'documentID',),
-
 
 ];
 
@@ -37,10 +41,10 @@ class _LandingPageManagerState extends State<LandingPageManager> {
   double barHeightWithNotch = 67;
   double arcHeightWithNotch = 67;
 
-  if (size.height > 900) {
-    barHeight = 40;
+  if (size.height > 700) {
+    barHeight = 62;
   } else {
-    barHeight = size.height * 0.11;
+    barHeight = size.height * 0.1;
   }
 
   if (viewPadding.bottom > 0) {
@@ -57,16 +61,17 @@ class _LandingPageManagerState extends State<LandingPageManager> {
         arcHeight: viewPadding.bottom > 0 ? arcHeightWithNotch : barHeight,
         itemTextOff: viewPadding.bottom > 0 ? 0 : 1,
         itemTextOn: viewPadding.bottom > 0 ? 0 : 1,
-        // circleOutline: 15.0,
+         circleOutline: 15.0,
         shadowAllowance: 0.0,
-        circleSize: 60.0,
+        circleSize: 50.0,
         blurShadowRadius: 50.0,
-        circleColor: Colors.green,
-        activeIconColor: Colors.white,
+        circleColor: Colors.white,
+        activeIconColor: Colors.black,
         inactiveIconColor: Colors.grey,
-        textColor: Colors.grey,
+        textColor: Colors.black,
+        hasElevationShadows: true,
 
-        barBackgroundColor: Colors.black.withOpacity(0.9),
+        barBackgroundColor: Colors.white,
         tabs: getTabsData(),
         onTabChangedListener: (index) => setState(() => selectedIndex = index),
       ),
@@ -77,14 +82,35 @@ class _LandingPageManagerState extends State<LandingPageManager> {
       return [
         TabData(
           icon: Icons.home,
-          iconSize: 25.0,
+          iconSize: 20.0,
           title: 'Home',
           fontSize: 15.sp,
           fontWeight: FontWeight.bold,
         ),
         TabData(
+          icon: Icons.group,
+          iconSize: 20.0,
+          title: 'All Users',
+          fontSize: 15.sp,
+          fontWeight: FontWeight.bold,
+        ),
+        TabData(
+          icon: Icons.live_tv,
+          iconSize: 20.0,
+          title: 'Go Live',
+          fontSize: 15.sp,
+          fontWeight: FontWeight.bold,
+        ),
+        TabData(
+          icon: Icons.search,
+          iconSize: 20.0,
+          title: 'Find User',
+          fontSize: 15.sp,
+          fontWeight: FontWeight.bold,
+        ),
+        TabData(
           icon: Icons.person,
-          iconSize: 25,
+          iconSize: 20,
           title: 'Profile',
           fontSize: 15.sp,
           fontWeight: FontWeight.bold,

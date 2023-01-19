@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:clip/Models/form_model.dart';
 import 'package:clip/Screens/landingPage_manager.dart';
 import 'package:clip/Utils/imagePickerManager.dart';
+import 'package:clip/Utils/localStorage.dart';
 import 'package:clip/Utils/progress_bar.dart';
 import 'package:clip/Utils/routers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,11 +26,14 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfileState extends State<EditProfile> with FormValidators {
 
+
+
   final FormModel formModel = FormModel();
  CollectionReference userCollection = FirebaseFirestore.instance.collection("Users");
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   ImagePickerManager imagePickerManager = ImagePickerManager();
+  User? currentuser = FirebaseAuth.instance.currentUser;
 
   bool loading = false;
 
@@ -39,28 +43,41 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
 
   File? profilePic;
 
-  Future<String>? imagePath;
-
-  Future<String>? userImage;
-
   var imageSnapshot;
+
+  String firstDropValue = "Abia";
+
+  var items = ['Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno', 'Cross River', 'Delta',
+    'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'Gombe', 'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi', 'Kogi',
+    'Kwara', 'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba',
+    'Yobe', 'Zamfara'];
+
+  String? imageUrl;
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: Text("Edit Profile",
-        style: TextStyle(color: Colors.green, fontSize: 20.sp )),),
+    return Scaffold(appBar: AppBar(
+      backgroundColor: Colors.black,
+      title: Text("Edit Profile",
+        style: TextStyle(color: Colors.white, fontSize: 20.sp )),),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
           child: Form(
                     key: formModel.editFormKey,
             child: Column(children: [
-              SizedBox(height: 10.h,),
+              SizedBox(height: 3.h,),
               Center(
-                child: Text("Welcome${_firebaseAuth.currentUser?.email} \n Fill in your details to create your profile",
-                  style: TextStyle(color: Colors.green, fontSize: 17.sp),),
+                child: Text("Welcome",
+                  style: TextStyle(color: Colors.black, fontSize: 20.sp, fontWeight: FontWeight.bold),),
               ),
-              SizedBox(height: 7.h,),
+              SizedBox(height: 1.h,),
+              Center(
+                child: Text("Fill in your details to create your profile",
+                  style: TextStyle(color: Colors.black, fontSize: 17.sp,),),
+              ),
+              SizedBox(height: 4.h,),
 
               InkWell(onTap: (){ _getImage(context);},
                 child: Center(
@@ -98,9 +115,9 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
               SizedBox(height: 3.h,),
               TextFormField(
                 textAlignVertical: TextAlignVertical.center,
-                cursorColor: Colors.white,
+                cursorColor: Colors.black,
                 style: TextStyle(
-                    color: Colors.white, fontSize: 18.sp),
+                    color: Colors.black, fontSize: 18.sp),
                 controller: formModel.fullnameTextModel,
                 validator: validateFullname,
                 decoration: InputDecoration(
@@ -108,25 +125,16 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
                         borderRadius: BorderRadius.circular(15),
                         borderSide: BorderSide(
                             width: 1, color: Colors.grey)),
-                    prefixIcon: Container(
-                      padding: EdgeInsets.all(15),
-                      child: SvgPicture.asset(
-                        'assets/images/profile_icon.svg',
-                        color: Colors.white,
-                      ),
-                    ),
-                  //  fillColor: Colors.grey,
-                    filled: true,
                     hintText: "Full Name",),
               ),
 
-              SizedBox(height: 5.h,),
+              SizedBox(height: 2.h,),
 
               TextFormField(
                 textAlignVertical: TextAlignVertical.center,
-                cursorColor: Colors.white,
+                cursorColor: Colors.black,
                 style: TextStyle(
-                    color: Colors.white, fontSize: 18.sp),
+                    color: Colors.black, fontSize: 18.sp),
                 controller: formModel.usernameTextModel,
                 validator: usernameValidator,
                 decoration: InputDecoration(
@@ -134,43 +142,45 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
                         borderRadius: BorderRadius.circular(15),
                         borderSide: BorderSide(
                             width: 1, color: Colors.grey)),
-                    prefixIcon: Container(
-                      padding: EdgeInsets.all(15),
-                      child: SvgPicture.asset(
-                        'assets/images/profile_icon.svg',
-                        color: Colors.grey,
-                      ),
-                    ),
-
-                   // fillColor: Colors.grey,
-                    filled: true,
+                  //  filled: true,
                     hintText: "username",),
               ),
+              SizedBox(height: 2.h),
 
-              SizedBox(height: 5.h,),
+              Row(children: [
+                Text("Location:", style: TextStyle(color: Colors.black, fontSize: 20.sp)),
+                SizedBox(width: 4.w,),
+
+                DropdownButton<String>(
+                    value: firstDropValue,
+                    style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.bold),
+                    items: items.map((String itemData) {
+                      return DropdownMenuItem(value: itemData, child: Text(itemData));
+
+                    }).toList(), onChanged: (newValue) {
+                  setState(() {
+                    firstDropValue = newValue!;
+                  });
+                }),
+
+              ],),
+
+              SizedBox(height: 2.h,),
               TextFormField(
                 textAlignVertical: TextAlignVertical.center,
-                cursorColor: Colors.white,
+                cursorColor: Colors.black,
                 style: TextStyle(
-                    color: Colors.white, fontSize: 18.sp),
+                    color: Colors.black, fontSize: 18.sp),
                 controller: formModel.bioTextModel,
                 validator: validateBio,
                 decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                             width: 1, color: Colors.grey)),
-                    prefixIcon: Container(
-                      padding: EdgeInsets.all(15),
-                      child: SvgPicture.asset(
-                        'assets/images/profile_icon.svg',
-                        color: Colors.white,
-                      ),
-                    ),
-                    //  fillColor: Colors.grey,
-                    filled: true,
                     hintText: "Bio",),
               ),
+              SizedBox(height: 4.h,),
               loading ? ProgressBar():
                   ElevatedButton(onPressed: (){
 
@@ -181,14 +191,18 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
                       submitDetails();
 
                     }
-                    else{loading = false;}
+                    else{
+                      loading = false;
+                    }
 
-                  }, child: Text("Submit"),
+                  },
 
                   style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ), primary: Colors.green,
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h)))
+                      padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 2.h)),
+                      child: const Text("Submit",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),))
 
 
             ],),
@@ -201,14 +215,19 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
     Future<void> submitDetails() async {
 
       uploadImage();
+      getImageLink();
 
-      return userCollection.doc(_firebaseAuth.currentUser?.uid).set({"name": formModel.fullnameTextModel.text,
+       return userCollection.doc(_firebaseAuth.currentUser?.uid).set({
+        "name": formModel.fullnameTextModel.text,
         "username": formModel.usernameTextModel.text,
-      }).then((value) => navigateToHome())
+        "Location": firstDropValue,
+        "Bio": formModel.bioTextModel.text,
+         "profilePic": imageUrl
+       //  "profilePic": "https://firebasestorage.googleapis.com/v0/b/clip-33f21.appspot.com/o/Hx4WrMZ5hrTCEWPMPri3SyixlWm1%2FUserProfilePic?alt=media&token=f1bf26bf-0f12-4215-9d4e-a703b1cd4843"
 
-         .catchError((error) => print("there was an error"));
-
-  }
+       }).then((value) => navigateToHome())
+          .catchError((error) => print("there was an error"));
+    }
 
   navigateToHome() {
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
@@ -216,14 +235,14 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
     }));
   }
 
-  Future updateUserDetails(String uid) async {
+  /*Future updateUserDetails(String uid) async {
     print("print this line inside updateuserdetails");
     print("printing uid as $uid");
     return await userCollection.doc(uid).set({
       "fullName": formModel.fullnameTextModel.text,
       "username": formModel.usernameTextModel.text
     },SetOptions(merge: true));
-  }
+  }*/
 
   void _getImage(BuildContext context) async{
     try{
@@ -234,7 +253,7 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
           setState(() {
             profilePic = file;
           });
-       //   uploadPicture(image: profilePic);
+
           });
 
     }catch(e){}
@@ -248,13 +267,20 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
    if(profilePic != null){
      imageSnapshot = await firebaseStorage
          .ref(_firebaseAuth.currentUser?.uid).child("UserProfilePic").putFile(imagePath);
+     }
+    }
 
-     print("printing this line after imagesnapshot");
-     print("printing user image again as $imageSnapshot");
-     print("printing user image again as ${imageSnapshot.toString()}");
+  Future<void> getImageLink() async {
+    Reference profilePicRef =
+    FirebaseStorage.instance.ref(currentuser?.uid).child("UserProfilePic");
 
-   }
+     imageUrl = await profilePicRef.getDownloadURL();
+    print(".............HHHHHHHH................$imageUrl");
 
- }
+    /*setState(() {
+      imageLink = imageUrl;
+    });*/
+
+  }
 
 }

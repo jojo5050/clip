@@ -1,5 +1,6 @@
 import 'package:clip/Screens/edit_profile.dart';
 import 'package:clip/Utils/progress_bar.dart';
+import 'package:clip/Utils/routers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +99,28 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               loading1 = false;
             });
           },
-              child: const Text("Resend", style: TextStyle(color: Colors.green),)))
+              child: const Text("Resend Verification Link",
+                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),),)),
+          SizedBox(height: 20.h,),
+          const Text("Note: Unverified Email address limits you from accessing all Functions",
+          style: TextStyle(color: Colors.black),),
+          SizedBox(height: 3.h,),
+
+          ElevatedButton(
+              onPressed: () {
+                Routers.pushNamed(context, '/edit_profile');
+              },
+
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  primary: Colors.green,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 10),
+                  textStyle: TextStyle(
+                      fontSize: 16.sp, fontWeight: FontWeight.bold)),
+              child: const Text("I'll Verify Later")),
         ],
       ),
     );

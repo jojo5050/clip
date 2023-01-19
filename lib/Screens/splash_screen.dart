@@ -25,10 +25,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     delayAndNavigate();
-    /* uid = _user.toString();
-    initialiseUser();
-    super.initState();
-    navigate();*/
   }
 
   @override
