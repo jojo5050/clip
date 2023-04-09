@@ -12,23 +12,23 @@ class FirstOnboardScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 10.h),
-        child: Center(
           child: Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
                       onPressed: () {
                         Routers.pushNamed(context, '/loginScreen');
                       },
-                      child: const Text(
+                      child: Text(
                         "Skip",
                         style: TextStyle(
-                            color: Colors.green, fontWeight: FontWeight.bold),
+                            color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.sp),
                       ))
                 ],
               ),
-              // SizedBox(height: 15.h),
+               SizedBox(height: 5.h),
 
               Container(
                 child: Image.asset(
@@ -52,32 +52,26 @@ class FirstOnboardScreen extends StatelessWidget {
                         decoration: TextDecoration.none),
                   ),
            ),
-              Padding(
-                padding: const EdgeInsets.only(left: 30, right: 30),
-                child: Row(children: const [
-                    CircleAvatar(
-                      backgroundColor: Colors.green,
-                      radius: 5,
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    CircleAvatar(
-                      backgroundColor: Colors.white30,
-                      radius: 5,
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    CircleAvatar(
-                      backgroundColor: Colors.white30,
-                      radius: 5,
-                    ),
-                  ]),
+
+              SizedBox(height: 20.h,),
+
+              Center(
+                child: Row(children:  [
+                      const CircleAvatar(
+                        backgroundColor: Colors.green,
+                        radius: 5,
+                      ),
+                      SizedBox(
+                        width: 2.w,
+                      ),
+                      const CircleAvatar(
+                        backgroundColor: Colors.white30,
+                        radius: 5,
+                      ),
+                    ]),
               ),
             ],
           ),
-        ),
       ),
     );
   }

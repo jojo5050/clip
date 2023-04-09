@@ -1,6 +1,6 @@
 import 'package:circle_bottom_navigation_bar/circle_bottom_navigation_bar.dart';
 import 'package:circle_bottom_navigation_bar/widgets/tab_data.dart';
-import 'package:clip/Screens/landing.dart';
+import 'package:clip/Screens/chat_user_list.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -22,11 +22,13 @@ class _LandingPageManagerState extends State<LandingPageManager> {
   int selectedIndex = 0;
 
   static const List<Widget> _pages = <Widget>[
-  Landing(uid: "uid"),
+ // Landing(uid: "uid"),
+    LogedUserProfile(documentID: 'documentID',),
   AllUsers(),
-  GoLive(),
+    ChatUserList(),
   FindUsers(),
-  LogedUserProfile(documentID: 'documentID',),
+    GoLive(),
+
 
 ];
 
@@ -81,9 +83,9 @@ class _LandingPageManagerState extends State<LandingPageManager> {
   List<TabData> getTabsData() {
       return [
         TabData(
-          icon: Icons.home,
+          icon: Icons.person,
           iconSize: 20.0,
-          title: 'Home',
+          title: 'Profile',
           fontSize: 15.sp,
           fontWeight: FontWeight.bold,
         ),
@@ -95,9 +97,9 @@ class _LandingPageManagerState extends State<LandingPageManager> {
           fontWeight: FontWeight.bold,
         ),
         TabData(
-          icon: Icons.live_tv,
+          icon: Icons.chat,
           iconSize: 20.0,
-          title: 'Go Live',
+          title: 'Chat',
           fontSize: 15.sp,
           fontWeight: FontWeight.bold,
         ),
@@ -109,9 +111,9 @@ class _LandingPageManagerState extends State<LandingPageManager> {
           fontWeight: FontWeight.bold,
         ),
         TabData(
-          icon: Icons.person,
+          icon: Icons.live_tv,
           iconSize: 20,
-          title: 'Profile',
+          title: 'Go Live',
           fontSize: 15.sp,
           fontWeight: FontWeight.bold,
         ),

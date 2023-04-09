@@ -105,7 +105,8 @@ class _LoginScreenState extends State<LoginScreen> with FormValidators {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                    },
                     child: const Text(
                       'Forgot Password',
                       style: TextStyle(color: Colors.black, fontSize: 15),

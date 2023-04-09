@@ -1,6 +1,8 @@
 
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:clip/AuthMangers/auth_service.dart';
 import 'package:clip/Models/form_model.dart';
 import 'package:clip/Screens/landingPage_manager.dart';
 import 'package:clip/Utils/imagePickerManager.dart';
@@ -16,6 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:flutter_svg/svg.dart';
 import '../Models/form_validators.dart';
+import 'loged_user_profile.dart';
+import 'package:intl/intl.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({Key? key,}) : super(key: key);
@@ -29,7 +33,8 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
 
 
   final FormModel formModel = FormModel();
- CollectionReference userCollection = FirebaseFirestore.instance.collection("Users");
+  CollectionReference userCollection = FirebaseFirestore.instance.collection("Users");
+
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   ImagePickerManager imagePickerManager = ImagePickerManager();
@@ -43,8 +48,6 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
 
   File? profilePic;
 
-  var imageSnapshot;
-
   String firstDropValue = "Abia";
 
   var items = ['Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno', 'Cross River', 'Delta',
@@ -52,7 +55,28 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
     'Kwara', 'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba',
     'Yobe', 'Zamfara'];
 
-  String? imageUrl;
+  String? image;
+
+  String? imageLink;
+
+  String? imageString;
+
+  String? downloadUrl;
+
+  String? a;
+
+  TaskSnapshot? imageSnapshot;
+
+  String initialValue = "Male";
+  var sexValue = ['Male', 'Female'];
+
+  TextEditingController dateController =  TextEditingController();
+
+  @override
+  void initState() {
+    dateController.text = "";
+    super.initState();
+  }
 
 
   @override
@@ -146,6 +170,55 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
                     hintText: "username",),
               ),
               SizedBox(height: 2.h),
+              Row(children: [
+                Text("Sex:", style: TextStyle(color: Colors.black, fontSize: 20.sp)),
+                SizedBox(width: 4.w,),
+
+                DropdownButton<String>(
+                    value: initialValue,
+                    style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.bold),
+                    items: sexValue.map((String itemData) {
+                      return DropdownMenuItem(value: itemData, child: Text(itemData));
+
+                    }).toList(), onChanged: (newValue) {
+                  setState(() {
+                    initialValue = newValue!;
+                  });
+                }),
+
+              ],),
+
+              SizedBox(height: 2.h,),
+
+              TextFormField(
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(1960),
+                      lastDate: DateTime(2025));
+                  if (pickedDate != null) {
+                    print("..........................$pickedDate");
+                    String formatDate =
+                    DateFormat("yyyy-MM-DD").format(pickedDate);
+                    setState(() {
+                      dateController.text = formatDate;
+                    });
+                  } else {
+                    print("...............Date is empty");
+                  }
+                },
+                controller: dateController,
+                style: TextStyle(color: Colors.black, fontSize: 18.sp),
+                decoration: const InputDecoration(
+                    suffixIcon: Icon(
+                      Icons.calendar_today,
+                      color: Colors.black,
+                    ),
+                    hintText: "Date",
+                    hintStyle: TextStyle(color: Colors.black)),
+                readOnly: true,
+              ),
 
               Row(children: [
                 Text("Location:", style: TextStyle(color: Colors.black, fontSize: 20.sp)),
@@ -188,7 +261,7 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
                       setState(() {
                         loading = true;
                       });
-                      submitDetails();
+                      uploadImage();
 
                     }
                     else{
@@ -213,25 +286,23 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
   }
 
     Future<void> submitDetails() async {
-
-      uploadImage();
-      getImageLink();
-
        return userCollection.doc(_firebaseAuth.currentUser?.uid).set({
         "name": formModel.fullnameTextModel.text,
         "username": formModel.usernameTextModel.text,
         "Location": firstDropValue,
         "Bio": formModel.bioTextModel.text,
-         "profilePic": imageUrl
-       //  "profilePic": "https://firebasestorage.googleapis.com/v0/b/clip-33f21.appspot.com/o/Hx4WrMZ5hrTCEWPMPri3SyixlWm1%2FUserProfilePic?alt=media&token=f1bf26bf-0f12-4215-9d4e-a703b1cd4843"
+         "profilePic": downloadUrl,
+         "userID": currentuser?.uid,
+         "DOB": dateController.text
 
        }).then((value) => navigateToHome())
-          .catchError((error) => print("there was an error"));
+        .catchError((error) => print(error));
+
     }
 
   navigateToHome() {
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
-      return LandingPageManager(uid: 'uid',);
+      return const LandingPageManager(uid: "uid",);
     }));
   }
 
@@ -260,27 +331,22 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
 
   }
 
- Future <void> uploadImage() async {
+ Future<void> uploadImage() async {
     var imagePath = File(profilePic!.path);
    final firebaseStorage = FirebaseStorage.instance;
 
    if(profilePic != null){
-     imageSnapshot = await firebaseStorage
-         .ref(_firebaseAuth.currentUser?.uid).child("UserProfilePic").putFile(imagePath);
-     }
+
+     imageSnapshot = await firebaseStorage.ref(_firebaseAuth.currentUser?.uid).putFile(imagePath);
+
+     }else{
+     print("error image is empty");
+   }
+
+    downloadUrl = await (await imageSnapshot)?.ref.getDownloadURL();
+
+    submitDetails();
+
     }
-
-  Future<void> getImageLink() async {
-    Reference profilePicRef =
-    FirebaseStorage.instance.ref(currentuser?.uid).child("UserProfilePic");
-
-     imageUrl = await profilePicRef.getDownloadURL();
-    print(".............HHHHHHHH................$imageUrl");
-
-    /*setState(() {
-      imageLink = imageUrl;
-    });*/
-
-  }
 
 }

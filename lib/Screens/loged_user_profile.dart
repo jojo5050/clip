@@ -47,19 +47,17 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           dynamic data = snapshot.data?.data();
 
-          loadImage();
-
           if (snapshot.connectionState == ConnectionState.done) {
             return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 15.h),
+              padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 7.h),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Container(
-                        height: 40,
-                        width: 40,
+                        height: 45,
+                        width: 45,
                         decoration: BoxDecoration(
                             color: Colors.grey,
                             borderRadius: BorderRadius.circular(15)),
@@ -71,7 +69,7 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                             icon: const Icon(
                               Icons.more_vert,
                               color: Colors.white,
-                              size: 30,
+                              size: 25,
                             ),
                             itemBuilder: (context) => [
                                   PopupMenuItem(
@@ -108,19 +106,15 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                     ],
                   ),
                   SizedBox(
-                    height: 7.h,
+                    height: 5.h,
                   ),
                   Center(
-                      child: imageData != null
-                          ? CircleAvatar(
+                      child: CircleAvatar(
                               radius: 70,
-                              backgroundColor: Colors.grey,
-                              backgroundImage: NetworkImage("$imageData"),
+                              backgroundColor: Colors.transparent,
+                              backgroundImage: NetworkImage(data["profilePic"]),
                             )
-                          : const CircleAvatar(
-                              radius: 70,
-                              backgroundColor: Colors.greenAccent,
-                            )),
+                      ),
                   SizedBox(
                     height: 5.h,
                   ),
@@ -140,7 +134,23 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                     height: 2.h,
                   ),
                   Text("${data['Location'] ?? ""} ",  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.sp),)
+                      color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.sp),),
+
+                  ElevatedButton(
+                      onPressed: () {
+                        accept();
+
+                      },
+                      style: ElevatedButton.styleFrom(
+                          shape: new RoundedRectangleBorder(
+                            borderRadius: new BorderRadius.circular(30.0),
+                          ),
+                          primary: Colors.red,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30.w, vertical: 2.h),
+                          textStyle: TextStyle(
+                              fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                      child: const Text('Accept Request')),
                 ],
               ),
             );
@@ -157,13 +167,6 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
     );
   }
 
-  Future<void> loadImage() async {
-    Reference profilePicRef =
-        FirebaseStorage.instance.ref(currentuser?.uid).child("UserProfilePic");
-    imageData = await profilePicRef.getDownloadURL();
-    print("printing image data as$imageData");
-  }
-
   void signOut() {
     _firebaseAuth.signOut();
     Navigator.of(context).pushAndRemoveUntil(
@@ -171,5 +174,10 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
           builder: (context) => const LoginScreen(),
         ),
         (route) => false);
+  }
+
+  void accept() {
+
+
   }
 }

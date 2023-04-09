@@ -33,95 +33,97 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(
-            height: 10.h,
-          ),
-          Text(
-            "A verification link has be sent to ",
-            style: TextStyle(fontSize: 16.sp),
-          ),
-          Text(
-            "${_firebaseAuth.currentUser!.email}",
-            style: TextStyle(
-                color: Colors.black,
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold),
-          ),
-          Text(
-            "Click on the link to activate your account",
-            style: TextStyle(fontSize: 16.sp),
-          ),
-          SizedBox(
-            height: 20.h,
-          ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 10.h,
+            ),
+            Text(
+              "A verification link has be sent to ",
+              style: TextStyle(fontSize: 16.sp),
+            ),
+            Text(
+              "${_firebaseAuth.currentUser!.email}",
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "Click on the link to activate your account",
+              style: TextStyle(fontSize: 16.sp),
+            ),
+            SizedBox(
+              height: 20.h,
+            ),
 
-          Text(
-            "Already verified your Email ? ",
-            style: TextStyle(color: Colors.green, fontSize: 20.sp),
-          ),
-          SizedBox(
-            height: 2.h,
-          ),
-          loading
-              ? ProgressBar()
-              : ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      primary: Colors.green,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 20.w, vertical: 3.h)),
-                  onPressed: () {
-                    setState(() {
-                      loading = true;
-                    });
-                    isEmailVeriFied();
-                  },
-                  child: Text(
-                    "Continue",
-                    style: TextStyle(color: Colors.white),
-                  )),
+            Text(
+              "Already verified your Email ? ",
+              style: TextStyle(color: Colors.green, fontSize: 20.sp),
+            ),
+            SizedBox(
+              height: 2.h,
+            ),
+            loading
+                ? ProgressBar()
+                : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        primary: Colors.green,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 20.w, vertical: 3.h)),
+                    onPressed: () {
+                      setState(() {
+                        loading = true;
+                      });
+                      isEmailVeriFied();
+                    },
+                    child: Text(
+                      "Continue",
+                      style: TextStyle(color: Colors.white),
+                    )),
 
-          Center(child: loading1 ? ProgressBar():
-          TextButton(onPressed: (){
-            setState(() {
-              loading1 = true;
-            });
-            resendVerifycationLink();
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(duration: const Duration(seconds: 5),
-                    content: Text("A Link has been sent to "
-                    "${_firebaseAuth.currentUser?.email},"
-                    " Click on the link to activate your account")));
-            setState(() {
-              loading1 = false;
-            });
-          },
-              child: const Text("Resend Verification Link",
-                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),),)),
-          SizedBox(height: 20.h,),
-          const Text("Note: Unverified Email address limits you from accessing all Functions",
-          style: TextStyle(color: Colors.black),),
-          SizedBox(height: 3.h,),
+            Center(child: loading1 ? ProgressBar():
+            TextButton(onPressed: (){
+              setState(() {
+                loading1 = true;
+              });
+              resendVerifycationLink();
+              ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(duration: const Duration(seconds: 5),
+                      content: Text("A Link has been sent to "
+                      "${_firebaseAuth.currentUser?.email},"
+                      " Click on the link to activate your account")));
+              setState(() {
+                loading1 = false;
+              });
+            },
+                child: const Text("Resend Verification Link",
+                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),),)),
+            SizedBox(height: 20.h,),
+            const Text("Note: Unverified Email address limits you from accessing all Functions",
+            style: TextStyle(color: Colors.black),),
+            SizedBox(height: 3.h,),
 
-          ElevatedButton(
-              onPressed: () {
-                Routers.pushNamed(context, '/edit_profile');
-              },
+            ElevatedButton(
+                onPressed: () {
+                  Routers.pushNamed(context, '/edit_profile');
+                },
 
-              style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  primary: Colors.green,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 10),
-                  textStyle: TextStyle(
-                      fontSize: 16.sp, fontWeight: FontWeight.bold)),
-              child: const Text("I'll Verify Later")),
-        ],
+                style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    primary: Colors.green,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 10),
+                    textStyle: TextStyle(
+                        fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                child: const Text("I'll Verify Later")),
+          ],
+        ),
       ),
     );
   }

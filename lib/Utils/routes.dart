@@ -1,7 +1,7 @@
 
 
 import 'package:clip/Screens/edit_profile.dart';
-import 'package:clip/Screens/landing.dart';
+import 'package:clip/Screens/chat_user_list.dart';
 import 'package:clip/Screens/landingPage_manager.dart';
 import 'package:clip/Screens/loged_user_profile.dart';
 import 'package:clip/Screens/login_screen.dart';
@@ -19,7 +19,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (_) => SplashScreen());
 
     case '/landing':
-      return MaterialPageRoute(builder: (_) => Landing(uid: 'uid',));
+      return MaterialPageRoute(builder: (_) => ChatUserList());
 
     case '/edit_profile':
       return MaterialPageRoute(builder: (_) => EditProfile());

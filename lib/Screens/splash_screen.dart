@@ -5,7 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import '../AuthMangers/auth_checker.dart';
-import 'landing.dart';
+import 'chat_user_list.dart';
 import 'landingPage_manager.dart';
 import 'login_screen.dart';
 
