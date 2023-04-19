@@ -17,7 +17,8 @@ class ClientProfile extends StatefulWidget {
 
 class _ClientProfileState extends State<ClientProfile> {
 
-  CollectionReference requestCollection = FirebaseFirestore.instance.collection("Request");
+  CollectionReference requestRef = FirebaseFirestore.instance.collection("Request");
+
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
 
@@ -172,23 +173,7 @@ class _ClientProfileState extends State<ClientProfile> {
         style: TextStyle(color: Colors.white),
       ),
     ));
-
-    Map<String, dynamic> user1Map = {
-      "ownRequest": {
-        widget.clientInfo["userID"]
-      },
-      "username": widget.clientInfo["username"]
-    };
-    requestCollection.doc(_firebaseAuth.currentUser?.uid).update(user1Map);
-
-
-    Map<String, dynamic> user2Map = {
-      "friendRequest": {
-        _firebaseAuth.currentUser?.uid
-      },
-      "username": _firebaseAuth.currentUser?.displayName
-    };
-    requestCollection.doc(widget.clientInfo["userID"]).update(user2Map);
+       requestRef.doc(_firebaseAuth.currentUser?.uid).set({"ownRequest"});
   }
 
 

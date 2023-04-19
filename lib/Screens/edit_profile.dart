@@ -35,6 +35,7 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
   final FormModel formModel = FormModel();
   CollectionReference userCollection = FirebaseFirestore.instance.collection("Users");
 
+
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   ImagePickerManager imagePickerManager = ImagePickerManager();
