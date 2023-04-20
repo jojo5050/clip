@@ -345,9 +345,7 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
    }
 
     downloadUrl = await (await imageSnapshot)?.ref.getDownloadURL();
-
     submitDetails();
-
     }
 
 }

@@ -1,7 +1,4 @@
-import 'dart:io';
 
-import 'package:clip/AuthMangers/auth_service.dart';
-import 'package:clip/Models/user_model.dart';
 import 'package:clip/Screens/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,7 +7,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-import '../Utils/routers.dart';
+import '../Models/global_variables.dart';
+
 
 class LogedUserProfile extends StatefulWidget {
   final String documentID;
@@ -46,7 +44,6 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           dynamic data = snapshot.data?.data();
-
           if (snapshot.connectionState == ConnectionState.done) {
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 7.h),
@@ -154,16 +151,18 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                 ],
               ),
             );
+
           }
 
           return Container(
             child: Text(
               "No Data",
               style: TextStyle(color: Colors.green),
-            ),
-          );
-        },
-      )),
+            ),);
+          },
+        )
+
+      ),
     );
   }
 

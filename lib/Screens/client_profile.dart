@@ -4,7 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-import '../Utils/progress_bar.dart';
+import '../Models/form_model.dart';
+import '../Models/global_variables.dart';
 
 class ClientProfile extends StatefulWidget {
   const ClientProfile({Key? key, required this.clientInfo}) : super(key: key);
@@ -20,6 +21,7 @@ class _ClientProfileState extends State<ClientProfile> {
   CollectionReference requestRef = FirebaseFirestore.instance.collection("Request");
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FormModel formModel = FormModel();
 
 
   ClientDetails? clientInfo;
@@ -29,6 +31,13 @@ class _ClientProfileState extends State<ClientProfile> {
   bool loading2 = false;
   bool isCancelVisible = false;
   bool isSendVisible = true;
+
+  var clientid;
+
+  Map<String, dynamic>? clientMap;
+
+  Map<String, String?>? logedUserMap;
+
 
 
   @override
@@ -125,7 +134,6 @@ class _ClientProfileState extends State<ClientProfile> {
             SizedBox(
               height: 10.h,
             ),
-
               ElevatedButton(
                         onPressed: () {
                           send();
@@ -142,7 +150,6 @@ class _ClientProfileState extends State<ClientProfile> {
                             textStyle: TextStyle(
                                 fontSize: 15.sp, fontWeight: FontWeight.bold)),
                         child: const Text('Send Request')),
-
 
                    ElevatedButton(
                       onPressed: () {
@@ -167,13 +174,34 @@ class _ClientProfileState extends State<ClientProfile> {
   }
 
       Future<void> send() async {
+        clientid = widget.clientInfo["userID"];
+        clientMap = {
+          "name": widget.clientInfo["name"],
+          "profilePic": widget.clientInfo["profilePic"],
+          "status": "requested",
+          "clientId": clientid
+        };
+
+        logedUserMap = {
+          "name": logedUserName,
+          "profilePic": logedUserPic,
+          "status": "requested",
+          "logedUserID": _firebaseAuth.currentUser?.uid
+        };
+
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text(
         "friend request sent",
         style: TextStyle(color: Colors.white),
       ),
     ));
-       requestRef.doc(_firebaseAuth.currentUser?.uid).set({"ownRequest"});
+       requestRef.doc(_firebaseAuth.currentUser?.uid).set({
+         "ownRequest": clientMap
+       });
+
+       requestRef.doc(clientid).set({
+          "friendRequest": logedUserMap
+       });
   }
 
 
@@ -209,4 +237,5 @@ class _ClientProfileState extends State<ClientProfile> {
       isCancelVisible = !isCancelVisible;
     });
   }
+
 } 
