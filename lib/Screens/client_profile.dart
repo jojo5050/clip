@@ -18,7 +18,7 @@ class ClientProfile extends StatefulWidget {
 
 class _ClientProfileState extends State<ClientProfile> {
 
-  CollectionReference requestRef = FirebaseFirestore.instance.collection("Request");
+  CollectionReference requestRef = FirebaseFirestore.instance.collection("Users");
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FormModel formModel = FormModel();
@@ -32,11 +32,11 @@ class _ClientProfileState extends State<ClientProfile> {
   bool isCancelVisible = false;
   bool isSendVisible = true;
 
-  var clientid;
-
   Map<String, dynamic>? clientMap;
 
   Map<String, String?>? logedUserMap;
+
+  var clientid;
 
 
 
@@ -137,8 +137,8 @@ class _ClientProfileState extends State<ClientProfile> {
               ElevatedButton(
                         onPressed: () {
                           send();
-                          showCancelButton();
-                          hideSendButton();
+                         // showCancelButton();
+                         // hideSendButton();
                         },
                         style: ElevatedButton.styleFrom(
                             shape: new RoundedRectangleBorder(
@@ -175,33 +175,16 @@ class _ClientProfileState extends State<ClientProfile> {
 
       Future<void> send() async {
         clientid = widget.clientInfo["userID"];
-        clientMap = {
-          "name": widget.clientInfo["name"],
-          "profilePic": widget.clientInfo["profilePic"],
-          "status": "requested",
-          "clientId": clientid
-        };
-
-        logedUserMap = {
-          "name": logedUserName,
-          "profilePic": logedUserPic,
-          "status": "requested",
-          "logedUserID": _firebaseAuth.currentUser?.uid
-        };
 
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text(
-        "friend request sent",
+        "friend request has been sent",
         style: TextStyle(color: Colors.white),
       ),
     ));
-       requestRef.doc(_firebaseAuth.currentUser?.uid).set({
-         "ownRequest": clientMap
-       });
+        sendRequest(clientid!);
 
-       requestRef.doc(clientid).set({
-          "friendRequest": logedUserMap
-       });
+
   }
 
 
@@ -238,4 +221,20 @@ class _ClientProfileState extends State<ClientProfile> {
     });
   }
 
-} 
+  Future<void> sendRequest(String recipientId) async {
+    String senderID = _firebaseAuth.currentUser!.uid;
+
+    await requestRef.doc(senderID)
+        .collection("FriendsRequest")
+        .doc(clientid)
+        .set({"status": "OutGoingPending"});
+
+    await requestRef.doc(recipientId)
+        .collection("FriendsRequest")
+        .doc(senderID)
+        .set({"status": "IncomingPending"});
+
+     }
+  }
+
+

@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-import '../Models/global_variables.dart';
 
 
 class LogedUserProfile extends StatefulWidget {
@@ -27,13 +26,16 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  String userName = "";
-  String fullName = "";
 
   dynamic imageFile;
   Future<String>? profilePicUrl;
 
   String? imageData;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +72,66 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                             ),
                             itemBuilder: (context) => [
                                   PopupMenuItem(
+                                value: 1,
+                                child: Container(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(context, '/incoming_request');
+                                     // Navigator.of(context).pop();
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.group,
+                                          color: Colors.green,
+                                          size: 20.sp,
+                                        ),
+                                        SizedBox(
+                                          width: 20,
+                                        ),
+                                        Text(
+                                          "Friends Request",
+                                          style: TextStyle(
+                                              color: Colors.green,
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                                  PopupMenuItem(
+                                value: 1,
+                                child: Container(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(context, '/sent_friend_request');
+                                      // Navigator.of(context).pop();
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.group,
+                                          color: Colors.green,
+                                          size: 20.sp,
+                                        ),
+                                        SizedBox(
+                                          width: 20,
+                                        ),
+                                        Text(
+                                          "Sent Request",
+                                          style: TextStyle(
+                                              color: Colors.green,
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                                  PopupMenuItem(
                                     value: 1,
                                     child: Container(
                                       child: GestureDetector(
@@ -81,7 +143,7 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                                             Icon(
                                               Icons.logout,
                                               color: Colors.red,
-                                              size: 20,
+                                              size: 20.sp,
                                             ),
                                             SizedBox(
                                               width: 20,
@@ -90,7 +152,7 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                                               "LogOut",
                                               style: TextStyle(
                                                   color: Colors.red,
-                                                  fontSize: 14.sp,
+                                                  fontSize: 16.sp,
                                                   fontWeight: FontWeight.bold),
                                             ),
                                           ],
@@ -135,8 +197,7 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
 
                   ElevatedButton(
                       onPressed: () {
-                        accept();
-
+                      //  acceptRequest(clientid!);
                       },
                       style: ElevatedButton.styleFrom(
                           shape: new RoundedRectangleBorder(
@@ -175,8 +236,37 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
         (route) => false);
   }
 
-  void accept() {
+  Future<void> acceptRequest(String clientString) async {
+
+    String recipientUid = FirebaseAuth.instance.currentUser!.uid;
+    // Update friend request status in sender's subcollection
+    await FirebaseFirestore.instance.collection("Users").
+        doc(clientString)
+        .collection("FriendsRequest")
+        .doc(recipientUid);
+
+    await FirebaseFirestore.instance.collection("Users").
+    doc(recipientUid)
+        .collection("FriendsRequest")
+        .doc(clientString);
+
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(clientString)
+        .collection('friends')
+        .doc(recipientUid)
+        .set({});
+
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(recipientUid)
+        .collection('friends')
+        .doc(clientString)
+        .set({});
+
 
 
   }
+
+
 }

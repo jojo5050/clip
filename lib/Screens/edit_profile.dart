@@ -137,6 +137,8 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
     ),
     ),
               ),
+
+
               SizedBox(height: 3.h,),
               TextFormField(
                 textAlignVertical: TextAlignVertical.center,

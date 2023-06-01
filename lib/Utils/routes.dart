@@ -2,6 +2,8 @@
 
 import 'package:clip/Screens/edit_profile.dart';
 import 'package:clip/Screens/chat_user_list.dart';
+import 'package:clip/Screens/incoming_request.dart';
+import 'package:clip/Screens/sent_friends_request.dart';
 import 'package:clip/Screens/landingPage_manager.dart';
 import 'package:clip/Screens/loged_user_profile.dart';
 import 'package:clip/Screens/login_screen.dart';
@@ -23,6 +25,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case '/edit_profile':
       return MaterialPageRoute(builder: (_) => EditProfile());
+
+    case '/sent_friend_request':
+      return MaterialPageRoute(builder: (_) => SentFriendsRequest());
+
+    case '/incoming_request':
+      return MaterialPageRoute(builder: (_) => IncomingRequest());
 
     case '/logedUserProfile':
       return MaterialPageRoute(builder: (_) => LogedUserProfile(documentID: 'documentID',));

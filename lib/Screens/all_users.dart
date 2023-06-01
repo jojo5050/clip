@@ -41,7 +41,6 @@ class _AllUsersState extends State<AllUsers> {
           usersMap = usersSnapshot.data?.docs;
 
           if(usersSnapshot.hasData){
-
             return GridView.builder(
                 itemCount: usersSnapshot.data?.docs.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -51,7 +50,7 @@ class _AllUsersState extends State<AllUsers> {
                         itemBuilder: (context, index) {
                             var documentId  =  usersSnapshot.data?.docs[index];
                   if(documentId?.id == currentUser?.uid) {
-                    return Container(height: 0,);
+                    return SizedBox.shrink();
                   }
                   return InkWell(onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(builder: (context){
