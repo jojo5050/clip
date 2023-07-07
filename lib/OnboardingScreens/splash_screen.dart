@@ -4,10 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import '../AuthMangers/auth_checker.dart';
-import 'chat_user_list.dart';
-import 'landingPage_manager.dart';
-import 'login_screen.dart';
+import '../../AuthMangers/auth_checker.dart';
+import '../../ChatManager/chat_user_list.dart';
+import '../Screens/landingPage_manager.dart';
+import '../Screens/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);

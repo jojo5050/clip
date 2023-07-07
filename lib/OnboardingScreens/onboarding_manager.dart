@@ -1,6 +1,8 @@
-import 'package:clip/Screens/OnboardingScreens/first_onboard_screen.dart';
-import 'package:clip/Screens/OnboardingScreens/second_onboard_screen.dart';
+
+import 'package:clip/OnboardingScreens/second_onboard_screen.dart';
 import 'package:flutter/material.dart';
+
+import 'first_onboard_screen.dart';
 
 class OnboardManager extends StatelessWidget {
   final pageController = PageController(initialPage: 0);

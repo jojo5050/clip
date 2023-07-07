@@ -17,16 +17,16 @@ class ClientProfile extends StatefulWidget {
 }
 
 class _ClientProfileState extends State<ClientProfile> {
-
-  CollectionReference requestRef = FirebaseFirestore.instance.collection("Users");
+  CollectionReference requestRef =
+      FirebaseFirestore.instance.collection("Users");
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FormModel formModel = FormModel();
 
+  final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+  late Future<bool> isFriendRequestSent;
 
   ClientDetails? clientInfo;
-  bool sendRqst = false;
-  bool cancelRqst = false;
   bool loading1 = false;
   bool loading2 = false;
   bool isCancelVisible = false;
@@ -37,12 +37,16 @@ class _ClientProfileState extends State<ClientProfile> {
   Map<String, String?>? logedUserMap;
 
   var clientid;
+  String requestStatus = "OutGoingPending";
 
-
+  @override
+  void initState() {
+    isFriendRequestSent = checkFriendRequestStatus();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 6.h),
@@ -134,47 +138,103 @@ class _ClientProfileState extends State<ClientProfile> {
             SizedBox(
               height: 10.h,
             ),
-              ElevatedButton(
-                        onPressed: () {
-                          send();
-                         // showCancelButton();
-                         // hideSendButton();
-                        },
-                        style: ElevatedButton.styleFrom(
-                            shape: new RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(30.0),
-                            ),
-                            primary: Colors.green,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 30.w, vertical: 2.h),
-                            textStyle: TextStyle(
-                                fontSize: 15.sp, fontWeight: FontWeight.bold)),
-                        child: const Text('Send Request')),
 
-                   ElevatedButton(
-                      onPressed: () {
-                        cancel();
-                        showSendButton();
-                        hideCancelButton();
-                      },
-                      style: ElevatedButton.styleFrom(
-                          shape: new RoundedRectangleBorder(
-                            borderRadius: new BorderRadius.circular(30.0),
-                          ),
-                          primary: Colors.red,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 30.w, vertical: 2.h),
-                          textStyle: TextStyle(
-                              fontSize: 15.sp, fontWeight: FontWeight.bold)),
-                      child: const Text('Cancel Request')),
+            FutureBuilder<bool>(
+                future: isFriendRequestSent,
+                builder: (context, snapshot){
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  }
+
+                  if(snapshot.hasData){
+
+                    final isSent = snapshot.data!;
+                    if(isSent){
+                      return ElevatedButton(
+                          onPressed: () {
+                            cancelFriendRequest(widget.clientInfo.id)
+                            .then((_){
+                              setState(() {
+                                isFriendRequestSent = checkFriendRequestStatus();
+                              });
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                              shape: new RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(30.0),
+                              ),
+                              primary: Colors.red,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 30.w, vertical: 2.h),
+                              textStyle: TextStyle(
+                                  fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                          child: const Text('Cancel Request'));
+                    }else{
+                      return ElevatedButton(
+                          onPressed: () {
+                            sendFriendRequest(widget.clientInfo.id)
+                                .then((_){
+                              setState(() {
+                                isFriendRequestSent = checkFriendRequestStatus();
+                              });
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                              shape: new RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(30.0),
+                              ),
+                              primary: Colors.green,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 30.w, vertical: 2.h),
+                              textStyle: TextStyle(
+                                  fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                          child: const Text('Send Request'));
+
+                    }
+                  }
+                  return const Text('Error retrieving friend request status');
+
+                }),
+
           ],
         ),
       ),
     );
   }
 
-      Future<void> send() async {
-        clientid = widget.clientInfo["userID"];
+  Future<bool> checkFriendRequestStatus() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUserId)
+          .get();
+
+      final friendRequestData = snapshot.data()!['FriendsRequestField'];
+      final sentRequestIds = friendRequestData['sentRequests'].cast<String>();
+
+      return sentRequestIds.contains(widget.clientInfo.id);
+    }catch(error){
+      print('Error retrieving friend request status: $error');
+      return false;
+
+    }
+  }
+
+  Future <void> sendFriendRequest(String receiverId) async {
+    send();
+   // Add the current user's ID to the receiver's friend request list
+    FirebaseFirestore.instance.collection('Users').doc(receiverId).update({
+      'FriendsRequestField.receivedRequests ': FieldValue.arrayUnion([currentUserId]),
+    });
+
+    // Update the current user's friend request list
+    FirebaseFirestore.instance.collection('Users').doc(currentUserId).update({
+      'FriendsRequestField.sentRequests': FieldValue.arrayUnion([receiverId]),
+    });
+
+  }
+  Future<void> send() async {
+    clientid = widget.clientInfo["userID"];
 
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text(
@@ -182,59 +242,65 @@ class _ClientProfileState extends State<ClientProfile> {
         style: TextStyle(color: Colors.white),
       ),
     ));
-        sendRequest(clientid!);
-
-
-  }
-
-
-  void cancel() {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text(
-        "canceled",
-        style: TextStyle(color: Colors.white),
-      ),
-    ));
-  }
-
-  void showCancelButton() {
-    setState(() {
-      isCancelVisible = !isCancelVisible;
-    });
-  }
-
-  void hideSendButton() {
-    setState(() {
-      isSendVisible = !isSendVisible;
-    });
-  }
-
-  void showSendButton() {
-    setState(() {
-      isSendVisible = !isSendVisible;
-    });
-  }
-
-  void hideCancelButton() {
-    setState(() {
-      isCancelVisible = !isCancelVisible;
-    });
+    sendRequest(clientid!);
   }
 
   Future<void> sendRequest(String recipientId) async {
     String senderID = _firebaseAuth.currentUser!.uid;
 
-    await requestRef.doc(senderID)
+    await requestRef
+        .doc(senderID)
         .collection("FriendsRequest")
         .doc(clientid)
-        .set({"status": "OutGoingPending"});
+        .set({"status": "OutGoingPending", "senderID": senderID}) ;
 
-    await requestRef.doc(recipientId)
+    await requestRef
+        .doc(recipientId)
         .collection("FriendsRequest")
         .doc(senderID)
-        .set({"status": "IncomingPending"});
+        .set({"status": "IncomingPending", "senderID": senderID});
+  }
+   Future <void> cancelFriendRequest(String receiverId) async {
+     cancelRequest();
+    // Remove the current user's ID from the receiver's friend request list
+     FirebaseFirestore.instance.collection('Users').doc(receiverId).update({
+       'FriendsRequestField.receivedRequests': FieldValue.arrayRemove([currentUserId]),
+     });
 
-     }
+     // Remove the receiver ID from the current user list
+     FirebaseFirestore.instance.collection('Users').doc(currentUserId).update({
+       'FriendsRequestField.sentRequests': FieldValue.arrayRemove([receiverId]),
+     });
+   }
+
+  Future<void> cancelRequest() async {
+    clientid = widget.clientInfo["userID"];
+
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text(
+        "friend request has been cancelled",
+        style: TextStyle(color: Colors.white),
+      ),
+    ));
+    cancel(clientid!);
+
+  }
+
+  Future<void> cancel(String recipientId) async {
+    String senderID = _firebaseAuth.currentUser!.uid;
+    await requestRef
+        .doc(senderID)
+        .collection("FriendsRequest")
+        .doc(clientid).delete();
+
+    await requestRef
+        .doc(recipientId)
+        .collection("FriendsRequest")
+        .doc(senderID).delete();
+
+
+
   }
 
 
+}

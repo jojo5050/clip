@@ -1,7 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'package:clip/AuthMangers/auth_service.dart';
-import 'package:clip/Screens/chart_screen.dart';
+import 'package:clip/ChatManager/chart_screen.dart';
 import 'package:clip/Screens/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -50,7 +50,7 @@ class _ChatUserListState extends State<ChatUserList> {
         ),
       ),
 
-     body: _body(),
+      body: _body(),
     );
   }
 
@@ -59,12 +59,13 @@ class _ChatUserListState extends State<ChatUserList> {
     if(usersMap != null){
       return Container();
     }
-    
+
     return StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection("Users").snapshots(),
+        stream: FirebaseFirestore.instance.collection("Users")
+            .doc(currentUser!.uid).collection("Friends").snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> usersSnapshot){
           usersMap = usersSnapshot.data?.docs;
-          
+
           if(usersSnapshot.hasData){
             return ListView.builder(
                 itemCount: usersSnapshot.data?.docs.length,
@@ -76,18 +77,18 @@ class _ChatUserListState extends State<ChatUserList> {
 
                   return Padding(
                     padding: EdgeInsets.symmetric(horizontal: 2.w),
-                    child: InkWell(onTap: (){
+                    child: InkWell(/*onTap: (){
                       Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(
-                        arguments: ChatScreenArgs(
-                            peerAvatar:  usersMap![index]["profilePic"],
-                            peerName: usersMap![index]["username"],
-                            peerId: usersMap![index]["userID"]
+                          arguments: ChatScreenArgs(
+                              peerAvatar:  usersMap![index]["profilePic"],
+                              peerName: usersMap![index]["username"],
+                              peerId: usersMap![index]["userID"]
 
-                        )
+                          )
 
                       ) ));
 
-                    },
+                    }*/
                       child: Card(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
@@ -122,7 +123,7 @@ class _ChatUserListState extends State<ChatUserList> {
                   );
 
                 });
-            
+
           }
           else {
             return Center(
@@ -130,7 +131,7 @@ class _ChatUserListState extends State<ChatUserList> {
             );
 
           }
-          
+
         });
 
   }

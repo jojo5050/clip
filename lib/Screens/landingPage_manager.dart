@@ -1,12 +1,12 @@
 import 'package:circle_bottom_navigation_bar/circle_bottom_navigation_bar.dart';
 import 'package:circle_bottom_navigation_bar/widgets/tab_data.dart';
-import 'package:clip/Screens/chat_user_list.dart';
+import 'package:clip/ChatManager/chat_user_list.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
+import '../StreamingManager/go_live_page.dart';
 import 'all_users.dart';
 import 'find_users.dart';
-import 'go_live.dart';
 import 'loged_user_profile.dart';
 
 class LandingPageManager extends StatefulWidget {
@@ -27,7 +27,7 @@ class _LandingPageManagerState extends State<LandingPageManager> {
   AllUsers(),
     ChatUserList(),
   FindUsers(),
-    GoLive(),
+    GoLivePage(),
 
 
 ];

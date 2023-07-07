@@ -1,4 +1,5 @@
 
+import 'package:clip/AuthMangers/auth_service.dart';
 import 'package:clip/Screens/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -70,19 +71,25 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                               color: Colors.white,
                               size: 25,
                             ),
+                            onSelected: (val){
+                              switch (val){
+                                case 1: Navigator.pushNamed(context, '/incoming_request');
+                                break;
+                                case 2:  Navigator.pushNamed(context, '/sent_friend_request');
+                                break;
+                                case 4:  signOut();
+                                break;
+                              }
+
+                            },
                             itemBuilder: (context) => [
                                   PopupMenuItem(
                                 value: 1,
                                 child: Container(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushNamed(context, '/incoming_request');
-                                     // Navigator.of(context).pop();
-                                    },
                                     child: Row(
                                       children: [
                                         Icon(
-                                          Icons.group,
+                                          Icons.mobile_friendly,
                                           color: Colors.green,
                                           size: 20.sp,
                                         ),
@@ -98,21 +105,15 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                                         ),
                                       ],
                                     ),
-                                  ),
                                 ),
                               ),
                                   PopupMenuItem(
-                                value: 1,
+                                value: 2,
                                 child: Container(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushNamed(context, '/sent_friend_request');
-                                      // Navigator.of(context).pop();
-                                    },
                                     child: Row(
                                       children: [
                                         Icon(
-                                          Icons.group,
+                                          Icons.send_to_mobile,
                                           color: Colors.green,
                                           size: 20.sp,
                                         ),
@@ -128,38 +129,56 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                                         ),
                                       ],
                                     ),
-                                  ),
                                 ),
                               ),
                                   PopupMenuItem(
-                                    value: 1,
+                                    value: 3,
                                     child: Container(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          signOut();
-                                        },
                                         child: Row(
                                           children: [
                                             Icon(
-                                              Icons.logout,
-                                              color: Colors.red,
+                                              Icons.group,
+                                              color: Colors.green,
                                               size: 20.sp,
                                             ),
                                             SizedBox(
                                               width: 20,
                                             ),
                                             Text(
-                                              "LogOut",
+                                              "My Friends",
                                               style: TextStyle(
-                                                  color: Colors.red,
+                                                  color: Colors.green,
                                                   fontSize: 16.sp,
                                                   fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),
-                                      ),
                                     ),
                                   ),
+                                 PopupMenuItem(
+                                value: 4,
+                                child: Container(
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.logout,
+                                          color: Colors.red,
+                                          size: 20.sp,
+                                        ),
+                                        SizedBox(
+                                          width: 20,
+                                        ),
+                                        Text(
+                                          "LogOut",
+                                          style: TextStyle(
+                                              color: Colors.red,
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                ),
+                              ),
                                 ]),
                       )
                     ],
@@ -195,20 +214,6 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
                   Text("${data['Location'] ?? ""} ",  style: TextStyle(
                       color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.sp),),
 
-                  ElevatedButton(
-                      onPressed: () {
-                      //  acceptRequest(clientid!);
-                      },
-                      style: ElevatedButton.styleFrom(
-                          shape: new RoundedRectangleBorder(
-                            borderRadius: new BorderRadius.circular(30.0),
-                          ),
-                          primary: Colors.red,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 30.w, vertical: 2.h),
-                          textStyle: TextStyle(
-                              fontSize: 15.sp, fontWeight: FontWeight.bold)),
-                      child: const Text('Accept Request')),
                 ],
               ),
             );
@@ -228,6 +233,7 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
   }
 
   void signOut() {
+
     _firebaseAuth.signOut();
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
@@ -243,12 +249,14 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
     await FirebaseFirestore.instance.collection("Users").
         doc(clientString)
         .collection("FriendsRequest")
-        .doc(recipientUid);
+        .doc(recipientUid)
+        .update({"status": "Accepted"});
 
     await FirebaseFirestore.instance.collection("Users").
     doc(recipientUid)
         .collection("FriendsRequest")
-        .doc(clientString);
+        .doc(clientString)
+        .update({"status": "Accepted"});
 
     await FirebaseFirestore.instance
         .collection('Users')
@@ -263,9 +271,6 @@ class _LogedUserProfileState extends State<LogedUserProfile> {
         .collection('friends')
         .doc(clientString)
         .set({});
-
-
-
   }
 
 

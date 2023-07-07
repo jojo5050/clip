@@ -296,7 +296,8 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
         "Bio": formModel.bioTextModel.text,
          "profilePic": downloadUrl,
          "userID": currentuser?.uid,
-         "DOB": dateController.text
+         "DOB": dateController.text,
+         "Sex": initialValue
 
        }).then((value) => navigateToHome())
         .catchError((error) => print(error));
