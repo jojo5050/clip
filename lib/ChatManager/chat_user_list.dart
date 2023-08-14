@@ -48,6 +48,8 @@ class _ChatUserListState extends State<ChatUserList> {
    String currentUsrId = FirebaseAuth.instance.currentUser!.uid;
   TextEditingController searchBarTec = TextEditingController();
 
+  String? userStatus;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,6 +102,9 @@ class _ChatUserListState extends State<ChatUserList> {
       ChatListProvider chatListProvider) {
     if (doc != null) {
       UserChatModel userChatModel = UserChatModel.fromDocument(doc);
+       userStatus = userChatModel.status;
+       print(";;;;;;;;;;;;;;;;;;$userStatus");
+
 
       if (userChatModel.id == currentUsrId) {
         return SizedBox.shrink();
@@ -126,19 +131,42 @@ class _ChatUserListState extends State<ChatUserList> {
                     child:
                     Row(
                       children: [
-                        CircleAvatar(
-                          backgroundColor: Colors.transparent,
-                          backgroundImage: NetworkImage(
-                              userChatModel.photoUrl ?? ""),),
-                        SizedBox(width: 3.w,),
-                        Column(crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("${userChatModel.name}", style: TextStyle(
-                                color: Colors.black87, fontSize: 18.sp, fontWeight: FontWeight.bold),),
-                            SizedBox(height: 0.5.h,),
-                            Text("${userChatModel.location}", style: TextStyle(
-                                color: Colors.black87, fontSize: 18.sp, fontStyle: FontStyle.italic),),
+                        Container(
+                          child: userStatus == "Online" ?
+                              Stack(children: <Widget>[
+                                CircleAvatar(
+                                  backgroundColor: Colors.transparent,
+                                  backgroundImage: NetworkImage(
+                                      userChatModel.photoUrl ?? ""),),
+                                 const Positioned(
+                                  bottom: 23,
+                                  left: 24,
+                                  child: CircleAvatar(
+                                    radius: 8,
+                                    backgroundColor: Colors.green,
+                                  ),
+                                )
+                              ],)
+                              : CircleAvatar(
+                            backgroundColor: Colors.transparent,
+                            backgroundImage: NetworkImage(
+                                userChatModel.photoUrl ?? ""),),
 
+                        ),
+
+                        SizedBox(width: 3.w,),
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("${userChatModel.name}", style: TextStyle(
+                                    color: Colors.black87, fontSize: 18.sp, fontWeight: FontWeight.bold),),
+                                SizedBox(height: 0.5.h,),
+                                Text("${userChatModel.location}", style: TextStyle(
+                                    color: Colors.black87, fontSize: 18.sp, fontStyle: FontStyle.italic),),
+
+                              ],
+                            ),
                           ],
                         )
                       ],

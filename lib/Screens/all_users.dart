@@ -50,6 +50,7 @@ class _AllUsersState extends State<AllUsers> {
                     crossAxisCount: calculateCrossAxisCount(filteredUsers.length),),
                 itemBuilder: (context, index) {
                   var documentSnapshot = filteredUsers[index];
+                  print("////////////////////${documentSnapshot["status"]}");
 
                   return InkWell(onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(builder: (context){
@@ -114,12 +115,6 @@ class _AllUsersState extends State<AllUsers> {
         .doc(currentUserId)
         .collection('Friends')
         .get();
-    /*final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("Users").get();
-    final filteredUsers = querySnapshot.docs
-        .where((doc) => doc['friends'] == false && doc.id != currentUser)
-        .toList();*/
-    print(".................................$currentUser");
-
     final currentUserFriends = currentUserFriendsSnapshot.docs.map((doc) => doc.id).toList();
 
     final allUsersSnapshot = await FirebaseFirestore.instance.collection('Users').get();

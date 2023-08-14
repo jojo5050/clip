@@ -34,3 +34,19 @@ class ClientDetails{
 
 }
 
+enum MediaType {
+  image,
+  video,
+}
+
+class UserMedia {
+  final String url;
+  final MediaType type;
+
+  UserMedia({
+    required this.url,
+    required this.type,
+  });
+}
+
+

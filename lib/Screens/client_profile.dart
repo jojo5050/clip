@@ -37,7 +37,6 @@ class _ClientProfileState extends State<ClientProfile> {
   Map<String, String?>? logedUserMap;
 
   var clientid;
-  String requestStatus = "OutGoingPending";
 
   @override
   void initState() {

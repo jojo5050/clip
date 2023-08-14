@@ -56,6 +56,8 @@ dependencies:
   agora_rtm: ^1.1.1
   permission_handler: ^8.3.0
   http: ^0.13.1
+  video_player: ^2.7.0
+  chewie: ^1.7.0
 
 
 
@@ -92,6 +94,7 @@ flutter:
   assets:
     - assets/images/locationIcon.jpg
     - assets/images/profileavater.png
+    - assets/images/livestream.png
 
 
 

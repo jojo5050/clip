@@ -38,6 +38,7 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
+
   ImagePickerManager imagePickerManager = ImagePickerManager();
   User? currentuser = FirebaseAuth.instance.currentUser;
 
@@ -297,7 +298,8 @@ class _EditProfileState extends State<EditProfile> with FormValidators {
          "profilePic": downloadUrl,
          "userID": currentuser?.uid,
          "DOB": dateController.text,
-         "Sex": initialValue
+         "Sex": initialValue,
+         "status": "Online"
 
        }).then((value) => navigateToHome())
         .catchError((error) => print(error));

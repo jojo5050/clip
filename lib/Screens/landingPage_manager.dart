@@ -6,7 +6,7 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../StreamingManager/go_live_page.dart';
 import 'all_users.dart';
-import 'find_users.dart';
+import '../FriendsManager/friends_list.dart';
 import 'loged_user_profile.dart';
 
 class LandingPageManager extends StatefulWidget {
@@ -24,9 +24,9 @@ class _LandingPageManagerState extends State<LandingPageManager> {
   static const List<Widget> _pages = <Widget>[
  // Landing(uid: "uid"),
     LogedUserProfile(documentID: 'documentID',),
-  AllUsers(),
+    AllUsers(),
     ChatUserList(),
-  FindUsers(),
+    FriendsList(),
     GoLivePage(),
 
 
@@ -104,9 +104,9 @@ class _LandingPageManagerState extends State<LandingPageManager> {
           fontWeight: FontWeight.bold,
         ),
         TabData(
-          icon: Icons.search,
+          icon: Icons.group_outlined,
           iconSize: 20.0,
-          title: 'Find User',
+          title: 'Friends',
           fontSize: 15.sp,
           fontWeight: FontWeight.bold,
         ),

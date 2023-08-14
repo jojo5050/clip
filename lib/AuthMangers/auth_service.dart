@@ -1,6 +1,7 @@
 import 'package:clip/Models/user_model.dart';
 import 'package:clip/Utils/authResultStatus.dart';
 import 'package:clip/Utils/localStorage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import '../Utils/authExceptionHandler.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  CollectionReference userCollection = FirebaseFirestore.instance.collection("Users");
 
   AuthUserModel? userFromFirebase(User? user){
     if (user != null){
@@ -59,6 +61,10 @@ class AuthService {
       UserCredential result = (await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password));
       User? user = result.user;
+      await userCollection.doc(_firebaseAuth.currentUser!.uid).update({
+        "status": "Online"
+      });
+
       return userFromFirebase(user);
 
     } on FirebaseAuthException catch(e){

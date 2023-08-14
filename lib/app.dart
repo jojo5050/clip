@@ -1,3 +1,4 @@
+import 'package:clip/FriendsManager/friends_list_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -36,14 +37,17 @@ class _MyAppState extends State<MyApp> {
 
         Provider<ChatProvider>(
           create: (_) => ChatProvider(
-            //  prefs: this.prefs,
             firebaseFirestore: this.firebaseFirestore,
             firebaseStorage: this.firebaseStorage,
           ),
         ),
         Provider<ChatListProvider>(
           create: (_) => ChatListProvider(
-            //  prefs: this.prefs,
+            firebaseFirestore: this.firebaseFirestore,
+          ),
+        ),
+        Provider<FriendListProvider>(
+          create: (_) => FriendListProvider(
             firebaseFirestore: this.firebaseFirestore,
           ),
         ),

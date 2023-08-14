@@ -8,6 +8,7 @@ import 'package:clip/Screens/sent_friends_request.dart';
 import 'package:clip/Screens/landingPage_manager.dart';
 import 'package:clip/Screens/loged_user_profile.dart';
 import 'package:clip/Screens/login_screen.dart';
+import 'package:clip/Utils/full_image_viewer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

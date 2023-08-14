@@ -59,6 +59,8 @@ class _BroadCastPageState extends State<BroadCastPage>
 
   String? tokenValue;
 
+  String? agoraRtmToken;
+
   @override
   void dispose() {
     _users.clear();
@@ -86,21 +88,14 @@ class _BroadCastPageState extends State<BroadCastPage>
       widget.isBroadcaster ? ClientRole.Broadcaster : ClientRole.Audience,
     );
     if (widget.isBroadcaster) {
-      sendStreamIdToServer();
+      startStreamAndNotifyServer();
     }
 
     _addEventHandlers();
-   // await getToken(channelName, widget.userId);
     final String? agoraToken = await getToken(channelName, widget.userId);
 
     await _engine.joinChannelWithUserAccount(agoraToken, channelName, widget.userId);
 
-   /* await _engine.joinChannel(
-      tokenValue,
-      channelName,
-      widget.userId,
-      0,
-    );*/
   }
 
 
@@ -398,19 +393,6 @@ class _BroadCastPageState extends State<BroadCastPage>
     );
   }
 
-  /*Future<String?> getToken() async {
-      String broadCasterID = _firebaseAuth.currentUser!.uid;
-      DocumentSnapshot snapshot = await streamRef.doc(broadCasterID).get();
-      if (snapshot.exists) {
-        Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
-
-        if (data != null && data.containsKey("StreamToken")) {
-          tokenData = data["StreamToken"];
-        }
-      }
-      return null; // Field or document not found
-  }
-*/
   Widget _buildSendChannelMessage() {
     if (!_isLogin || !_isInChannel) {
       return Container();
@@ -522,7 +504,7 @@ class _BroadCastPageState extends State<BroadCastPage>
 
   void _createClient() async {
     _client = await AgoraRtmClient.createInstance(appID);
-    _client?.onMessageReceived = (AgoraRtmMessage message, String peerId) {
+    _client?.onMessageReceived = (RtmMessage message, String peerId) {
       //  _logPeer(message.text);
       print("printing message:${message.text}");
     };
@@ -540,33 +522,15 @@ class _BroadCastPageState extends State<BroadCastPage>
       }
     };
 
-  //  await getRtmToken();
-    _toggleLogin();
-    _toggleJoinChannel();
-  }
+    final String? agoraRtmToken = await getRtmToken(widget.userName);
 
-  Future<String?> getRtmToken() async {
-    String broadCasterID = _firebaseAuth.currentUser!.uid;
-    DocumentSnapshot snapshot = await streamRef.doc(broadCasterID).get();
-    if (snapshot.exists) {
-      Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
-
-      if (data != null && data.containsKey("StreamToken")) {
-        tokenData = data["StreamToken"];
-      }
-    }
-    return null; // Field or document not found
-
-  }
-
-  void _toggleLogin() async {
     String id = widget.userName;
     try {
       await _client?.login(
-        tokenData,
+        agoraRtmToken,
         id,
       );
-      print('Login success: ' + widget.userName);
+      print('Login success: ' + id);
 
       setState(() {
         _isLogin = true;
@@ -574,6 +538,24 @@ class _BroadCastPageState extends State<BroadCastPage>
     } catch (errorCode) {
       print('Login error: ' + errorCode.toString());
     }
+    _toggleJoinChannel();
+  }
+
+ Future<String> getRtmToken(String userId) async {
+  // String id = widget.userId;
+    final String rtmServerUrl
+    = 'https://rtm-server-8xza.vercel.app/rtm_token?userID=$userId';
+    final response = await http.get(Uri.parse(rtmServerUrl));
+
+    if (response.statusCode == 200) {
+      final  rtmTokenData = response.body;
+      print("print here again firsttttttttttttttttttttttt asssssssss $rtmTokenData");
+      return rtmTokenData;
+    } else {
+      throw Exception('Failed to generate Agora token');
+    }
+
+
   }
 
   void _toggleJoinChannel() async {
@@ -699,12 +681,13 @@ class _BroadCastPageState extends State<BroadCastPage>
    // _channel!.close();
     _engine.leaveChannel();
 
-    try {
+    notifyServer();
+  /*  try {
       FirebaseFirestore.instance
           .collection('Streams')
           .doc(broadCasterID)
           .delete();
-    } catch (e) {}
+    } catch (e) {}*/
   }
 
   void desplayMessage() {
@@ -721,7 +704,7 @@ class _BroadCastPageState extends State<BroadCastPage>
     );
   }
 
-  Future<void> sendStreamIdToServer() async {
+  Future<void> startStreamAndNotifyServer() async {
     String broadCasterID = _firebaseAuth.currentUser!.uid;
     streamRef.doc(broadCasterID).set({
      "Status": "Started",
@@ -745,30 +728,30 @@ class _BroadCastPageState extends State<BroadCastPage>
   }
 
    Future<String?> getToken(String channelName, String uid) async {
-    print("print here firsttttttttttttttttttttttt");
-    if(Platform.isAndroid){
-      final String tokenServerUrl = 'http://10.0.2.2:3000/token/$channelName';
+
+      final String tokenServerUrl = 'https://token-server-8a6vsn6kd-jojo5050.vercel.app/access_token?channelName=$channelName&role=subscriber&uid=$uid';
       final response = await http.get(Uri.parse(tokenServerUrl));
 
-      print("print here again firsttttttttttttttttttttttt");
       if (response.statusCode == 200) {
-         tokenData = response.body;
-
-        print("agora token as ;;;;;;;;;;;;;$tokenData");
-        /* setState(() {
-         tokenValue = tokenData;
-       });*/
-        print("print again agora token as ;;;;;;;;;;;;;$tokenValue");
+       final  tokenData = response.body;
+         print("print here again firsttttttttttttttttttttttt asssssssss $tokenData");
+         return tokenData;
       } else {
         throw Exception('Failed to generate Agora token');
       }
-      return tokenData;
-    }
-
-
-
 
    }
+
+  Future<void> notifyServer() async {
+    String broadCasterID = _firebaseAuth.currentUser!.uid;
+    streamRef.doc(broadCasterID).set({
+      "Status": "Stopped",
+      "hostId": broadCasterID,
+      "StreamToken": appID
+    });
+
+  }
+
 }
 
 class RTMMessage {
